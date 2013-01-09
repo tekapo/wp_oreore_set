@@ -1,8 +1,6 @@
 wp_oreore_set
 =============
 
-WordPress pack of Ore, by Ore, for Ore
+WordPress pack of Ore, by Ore, for Ore.
 
-The latest Japanese version of WordPress.
-
-and plugins:
+The latest Japanese version of WordPress and some my favorite plugins.
