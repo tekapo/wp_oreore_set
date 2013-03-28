@@ -4,7 +4,7 @@
  * Plugin URI: http://pento.net/projects/automatic-updater-for-wordpress/
  * Description: Automatically update your WordPress site, as soon as updates are released! Never worry about falling behing on updating again!
  * Author: pento
- * Version: 0.8.3
+ * Version: 0.8.4
  * Author URI: http://pento.net/
  * License: GPL2+
  * Text Domain: automatic-updater
@@ -516,6 +516,7 @@ class Automatic_Updater {
 
 				if ( 0 === $return ) {
 					$message .= esc_html__( 'We successfully upgraded WordPress Core from SVN!', 'automatic-updater' );
+					$message .= "<br><a href='http://core.trac.wordpress.org/log/'>http://core.trac.wordpress.org/log/</a>";
 					$message .= "<br><br>$update";
 				} else {
 					$found_error = true;

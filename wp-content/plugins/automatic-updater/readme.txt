@@ -4,7 +4,7 @@ Donate link: http://pento.net/donate/
 Tags: updates, core, plugins, themes, stable, nightly, svn, wordpress automatic upgrader
 Requires at least: 3.4
 Tested up to: 3.5
-Stable tag: 0.8.2
+Stable tag: 0.8.3
 License: GPL2+
 
 Automatically update WordPress, your themes and plugins! Never have to click the update button again!
@@ -42,6 +42,11 @@ There are some Actions and Filters provided, check the [Documentation](http://pe
 1. Subscribe to the [RSS feed](http://plugins.trac.wordpress.org/log/automatic-updater?limit=100&mode=stop_on_copy&format=rss) to be notified of changes
 
 == Changelog ==
+
+= 0.8.4 =
+* ADDED: A link to the SVN log browser for Core, when it updates
+* ADDED: Japanese (日本語) (ja) translation. Props [Tai](http://tekapo.com/)
+* UPDATED: Norwegian Bokmål (nb_NO) translation. Props [Bjørn Johansen](https://twitter.com/bjornjohansen)
 
 = 0.8.3 =
 * FIXED: Bug preventing normal WordPress Core updates from occurring
