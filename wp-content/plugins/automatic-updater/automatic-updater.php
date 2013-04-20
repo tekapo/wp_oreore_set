@@ -4,7 +4,7 @@
  * Plugin URI: http://pento.net/projects/automatic-updater-for-wordpress/
  * Description: Automatically update your WordPress site, as soon as updates are released! Never worry about falling behing on updating again!
  * Author: pento
- * Version: 0.8.4
+ * Version: 0.8.5
  * Author URI: http://pento.net/
  * License: GPL2+
  * Text Domain: automatic-updater
@@ -25,6 +25,7 @@ Automatic_Updater::$basename = plugin_basename( $automatic_updater_file );
 class Automatic_Updater {
 	private $running = false;
 	private $options = array();
+	private $options_serialized = '';
 
 	public static $basename;
 
@@ -43,6 +44,7 @@ class Automatic_Updater {
 
 		// Load the options, and check that they're all up to date.
 		$this->options = get_option( 'automatic-updater', array() );
+		$this->options_serialized = serialize( $this->options );
 		$this->plugin_upgrade();
 
 		add_action( 'shutdown', array( &$this, 'shutdown' ) );
@@ -102,6 +104,10 @@ class Automatic_Updater {
 	}
 
 	function shutdown() {
+		// No need to write to the DB if the options haven't changed
+		if ( serialize( $this->options ) === $this->options_serialized )
+			return;
+
 		update_option( 'automatic-updater', $this->options );
 	}
 
@@ -495,13 +501,16 @@ class Automatic_Updater {
 	}
 
 	function update_svn() {
-		$output       = array();
-		$return       = null;
+		$output              = array();
+		$return              = null;
 
-		$message      = '';
+		$message             = '';
 
-		$found_error  = false;
-		$found_update = false;
+		$found_error         = false;
+		$found_update        = false;
+
+		$found_core_update   = false;
+		$found_plugin_update = false;
 
 		$source_control = $this->under_source_control();
 
@@ -513,6 +522,7 @@ class Automatic_Updater {
 
 			if ( 0 !== strpos( $update, "At revision" ) ) {
 				$found_update = true;
+				$found_core_update = true;
 
 				if ( 0 === $return ) {
 					$message .= esc_html__( 'We successfully upgraded WordPress Core from SVN!', 'automatic-updater' );
@@ -555,6 +565,7 @@ class Automatic_Updater {
 				if ( 0 !== strpos( $update, "At revision" ) ) {
 					$plugin_upgrades++;
 					$found_update = true;
+					$found_plugin_update = true;
 
 					if ( 0 !== $return )
 						$found_error = true;
@@ -564,6 +575,8 @@ class Automatic_Updater {
 			}
 
 			if ( ! empty( $plugin_message ) ) {
+				if ( $found_core_update )
+					$message .= '<br><br>';
 				$message .= esc_html( _n( 'We upgraded the following plugin:', 'We upgraded the following plugins:', $plugin_upgrades, 'automatic-updater' ) );
 				$message .= "<br><br>$plugin_message";
 			}
@@ -603,6 +616,8 @@ class Automatic_Updater {
 			}
 
 			if ( ! empty( $theme_message ) ) {
+				if ( $found_core_update || $found_plugin_update )
+					$message .= '<br><br>';
 				$message .= esc_html( _n( 'We upgraded the following theme:', 'We upgraded the following themes:', $theme_upgrades, 'automatic-updater' ) );
 				$message .= "<br><br>$theme_message";
 			}

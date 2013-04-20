@@ -4,7 +4,7 @@ Donate link: http://pento.net/donate/
 Tags: updates, core, plugins, themes, stable, nightly, svn, wordpress automatic upgrader
 Requires at least: 3.4
 Tested up to: 3.5
-Stable tag: 0.8.3
+Stable tag: 0.8.4
 License: GPL2+
 
 Automatically update WordPress, your themes and plugins! Never have to click the update button again!
@@ -42,6 +42,12 @@ There are some Actions and Filters provided, check the [Documentation](http://pe
 1. Subscribe to the [RSS feed](http://plugins.trac.wordpress.org/log/automatic-updater?limit=100&mode=stop_on_copy&format=rss) to be notified of changes
 
 == Changelog ==
+
+= 0.8.5 =
+* FIXED: Disable email notifications option was being set, but not showing up as set
+* FIXED: Only write to the options table when options have actually change
+* FIXED: Funky email layout if svn up'ing multiple things in one go
+* FIXED: Possible PHP error caused by including some core class definitions multiple times
 
 = 0.8.4 =
 * ADDED: A link to the SVN log browser for Core, when it updates
