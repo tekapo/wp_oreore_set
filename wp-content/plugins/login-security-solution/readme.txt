@@ -1,9 +1,9 @@
 === Login Security Solution ===
 Contributors: convissor
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=danielc%40analysisandsolutions%2ecom&lc=US&item_name=Donate%3a%20Login%20Security%20Solution&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted
-Tags: login, password, passwords, strength, strong, strong passwords, password strength, idle, timeout, maintenance, security, attack, hack, lock, lockdown, ban, brute force, brute, force, authentication, auth, cookie, users
+Tags: login, password, passwords, strength, strong, strong passwords, password strength, idle, timeout, maintenance, security, attack, hack, lock, lockdown, ban, brute force, brute, force, authentication, xml-rpc, auth, cookie, users
 Requires at least: 3.3
-Tested up to: 3.5.1
+Tested up to: 3.6beta3
 Stable tag: trunk
 
 Security against brute force attacks by tracking IP, name, password; requiring very strong passwords. Idle timeout. Maintenance mode lockdown.
@@ -17,7 +17,8 @@ WordPress installations.
 * Blocks brute force and dictionary attacks without inconveniencing
 legitimate users or administrators
     + Tracks IP addresses, usernames, and passwords
-    + Monitors logins made by form submissions and auth cookies
+    + Monitors logins made by form submissions, XML-RPC requests and
+      auth cookies
     + If a login failure uses data matching a past failure, the plugin
       slows down response times.  The more failures, the longer the delay.
       This limits attackers ability to effectively probe your site,
@@ -74,6 +75,7 @@ The tests have caught every password dictionary entry I've tried.
 
 * Multisite network support
 * Monitors authentication cookies for bad user names and hashes
+* Tracks logins from XML-RPC requests
 * Adjusts WordPress' password policy user interfaces
 * Takes security seriously so the plugin itself does not open your site
   to SQL, HTML, or header injection vulnerabilities
@@ -102,6 +104,8 @@ For reference, the similar plugins include:
 * [PMC Lockdown](http://wordpress.org/extend/plugins/pmc-lockdown/)
 * [Simple Login Lockdown](http://wordpress.org/extend/plugins/simple-login-lockdown/)
 * [Wordfence Security](http://wordpress.org/extend/plugins/wordfence/)
+* [WP Login Security](http://wordpress.org/extend/plugins/wp-login-security/)
+* [WP Login Security 2](http://wordpress.org/extend/plugins/wp-login-security-2/)
 
 
 = Compatibility with Other Plugins =
@@ -440,6 +444,20 @@ and `.mo` files:
 
 
 == Changelog ==
+
+= 0.39.0 (2013-05-29) =
+* Enforce password history during password reset process.
+
+= 0.38.0 (2013-05-27) =
+* Mention that the password force change process does not touch the admin
+that presses the button.
+* Remove HTML special characters when using WP's `blogname` setting.
+* Unit tests pass using PHP 5.3.27-dev, 5.4.17-dev, 5.5.0-dev
+* Tested under WordPress 3.5.1 and 3.6beta3 using regular and multisite.
+
+= 0.37.0 (2013-04-29) =
+* Monitor login attempts from XML-RPC requests.
+* Fix "te ernstig te" in the Dutch translation (thanks fwieringen@github).
 
 = 0.36.0 (2013-04-13) =
 * Have the password reset page say why a password isn't strong enough.
