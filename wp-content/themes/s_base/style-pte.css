@@ -1,0 +1,30 @@
+/* 
+    Document   : style-pte
+    Created on : 
+    Author     : Digitalcube
+    Description:
+        Purpose of the stylesheet follows.
+*/
+
+.site {
+	max-width: 1000px;
+	margin: 0 auto 2em;
+}
+
+.page-template-top-page-php .site-content {
+	margin: 0;
+}
+
+.site-header {
+	background-image: url(images/header_menu_back.png);
+	background-repeat: repeat-x;
+}
+
+.site-branding,
+h1.site-title {
+	display: inline-block;
+}
+
+.navigation-main {
+	width: 600px;
+}

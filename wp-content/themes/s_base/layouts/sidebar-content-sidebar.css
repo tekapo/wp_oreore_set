@@ -1,0 +1,34 @@
+/*
+Theme Name: s_base
+Layout: Sidebar-Content-Sidebar
+*/
+
+.content-area {
+	float: left;
+	width: 100%;
+}
+.site-content {
+	margin-left: 212px;
+	width: 566px;
+}
+
+.en-home .site-content,
+.home .site-content {
+	width: 100%;
+}
+.site-main .widget-area {
+	float: left;
+	margin: 0 0 0 -100%;
+	overflow: hidden;
+	width: 192px;
+}
+
+.site-main #tertiary {
+	float: right;
+	width: 202px;
+}
+
+.site-footer {
+	clear: both;
+	width: 100%;
+}
