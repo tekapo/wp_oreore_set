@@ -8,8 +8,8 @@
  * anything you'd like -- followed by front-page-only widgets in one or two columns.
  *
  * @package WordPress
- * @subpackage Twenty_Twelve
- * @since Twenty Twelve 1.0
+ * @subpackage s_base
+ * @since s_base 1.0
  */
 get_header();
 ?>
