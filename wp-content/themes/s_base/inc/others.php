@@ -5,7 +5,7 @@
  * 
  */
 register_nav_menus( array(
-	'footer_menu'		 => 'フッターメニュー',
+	'footer_menu' => 'フッターメニュー',
 //	'secondary_menu'	 => 'メニュー2'
 ) );
 
@@ -30,8 +30,10 @@ function echo_copyright( $param ) {
 function is_child_page_of( $page_id_or_slug ) {
 	global $post;
 	if ( !is_int( $page_id_or_slug ) ) {
-		$page			 = get_page_by_path( $page_id_or_slug );
-		$page_id_or_slug = $page->ID;
+		$page = get_page_by_path( $page_id_or_slug );
+		if ( !is_null( $page ) ) {
+			$page_id_or_slug = $page->ID;
+		}
 	}
 	if ( is_page() && $post->post_parent == $page_id_or_slug ) {
 		return true;
