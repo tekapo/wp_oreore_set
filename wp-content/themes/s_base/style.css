@@ -20,7 +20,7 @@ along with Nicolas Gallagher and Jonathan Neal http://necolas.github.com/normali
 and Blueprint http://www.blueprintcss.org/
 */
 
-@import url('layouts/sidebar-content-sidebar.css');
+@import url('layouts/content-sidebar.css');
 
 /* =Reset
 -------------------------------------------------------------- */
@@ -603,7 +603,7 @@ object {
 /* Additional
 -------------------------------------------------------------- */
 
-body {
+/*body {
     background-color: #fbf5e9;
 	font-size: 14px;
 }
@@ -611,7 +611,7 @@ body {
 a:link,
 a:visited {
 	color: #008b5e;
-}
+}*/
 
 
 .site {
