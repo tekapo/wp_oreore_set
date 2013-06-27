@@ -150,5 +150,5 @@ require get_template_directory() . '/inc/jetpack.php';
 /**
  * Other functions.
  */
-require get_template_directory() . '/inc/others.php';
+require get_template_directory() . '/inc/misc.php';
 
