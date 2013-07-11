@@ -4,10 +4,10 @@
  * Adding menu.
  * 
  */
-register_nav_menus( array(
-	'footer_menu' => 'フッターメニュー',
+//register_nav_menus( array(
+//	'footer_menu' => 'フッターメニュー',
 //	'secondary_menu'	 => 'メニュー2'
-) );
+//) );
 
 /*
  * Out put copyright.
