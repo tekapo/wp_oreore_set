@@ -3,8 +3,8 @@ Contributors: pento
 Donate link: http://pento.net/donate/
 Tags: updates, core, plugins, themes, stable, nightly, svn, wordpress automatic upgrader
 Requires at least: 3.4
-Tested up to: 3.5
-Stable tag: 0.8.4
+Tested up to: 3.6
+Stable tag: 0.9
 License: GPL2+
 
 Automatically update WordPress, your themes and plugins! Never have to click the update button again!
@@ -16,8 +16,6 @@ Automatic Updater keeps your WordPress install up to date with the latest releas
 If you're working on a WordPress Multisite install, it will properly restrict the options page to your Network Admin.
 
 While this will be useful for the vast majority of sites, please exercise caution, particularly if you have any custom themes or plugins running on your site.
-
-You should also be aware that this will only work on WordPress installs that have the appropriate file permissions to update through the web interface - it will not work if you usually FTP updates to your server.
 
 There are some Actions and Filters provided, check the [Documentation](http://pento.net/projects/automatic-updater-for-wordpress/) for more details.
 
@@ -42,6 +40,27 @@ There are some Actions and Filters provided, check the [Documentation](http://pe
 1. Subscribe to the [RSS feed](http://plugins.trac.wordpress.org/log/automatic-updater?limit=100&mode=stop_on_copy&format=rss) to be notified of changes
 
 == Changelog ==
+
+= 0.9.1 =
+* UPDATED: Language POT file
+* UPDATED: German (de_DE) translation. Props [Alexander Pfabel](http://alexander.pfabel.de/)
+* UPDATED: Dutch (nl_NL) translation. Props Trifon Rijksen
+* FIXED: If the `svn up` output was empty, don't send an update email
+* FIXED: Removed pass-by-reference, it's too old school for @wonderboymusic
+* FIXED: The settings link was incorrect in Multisite
+
+= 0.9 =
+* ADDED: Warning when Better WP Security is hiding update info
+* ADDED: Warning when the user can't update directly, but hasn't defined S/FTP login details
+* ADDED: AUTOMATIC_UPDATER_DISABLED wp-config option, for forcing updates to never happen
+* ADDED: Sanity check to make sure the plugin isn't accessed directly
+* CHANGED: For nightly build upgrade notification emails, include the build numbers
+* UPDATED: Tested up to WordPress 3.6
+* FIXED: Don't send a notification email if the core upgrade didn't change versions (ie, a nightly build with no changes)
+* FIXED: Settings page CSS wasn't loading if the plugin was installed in a symlink directory
+* FIXED: Themes and plugins in non-writeable directories weren't being highlighted correctly on the settings page
+* FIXED: Core upgrade retry emails were not showing the correct retry limit
+* FIXED: Nightly core upgrades can sometimes repeat more than once every 24 hours
 
 = 0.8.5 =
 * FIXED: Disable email notifications option was being set, but not showing up as set

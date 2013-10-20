@@ -4,12 +4,18 @@
  * Plugin URI: http://pento.net/projects/automatic-updater-for-wordpress/
  * Description: Automatically update your WordPress site, as soon as updates are released! Never worry about falling behing on updating again!
  * Author: pento
- * Version: 0.8.5
+ * Version: 0.9.1
  * Author URI: http://pento.net/
  * License: GPL2+
  * Text Domain: automatic-updater
  * Domain Path: /languages/
  */
+
+// Don't allow the plugin to be loaded directly
+if ( ! function_exists( 'add_action' ) ) {
+	echo "Please enable this plugin from your wp-admin.";
+	exit;
+}
 
 $automatic_updater_file = __FILE__;
 
@@ -47,12 +53,14 @@ class Automatic_Updater {
 		$this->options_serialized = serialize( $this->options );
 		$this->plugin_upgrade();
 
-		add_action( 'shutdown', array( &$this, 'shutdown' ) );
+		add_action( 'shutdown', array( $this, 'shutdown' ) );
 
-		add_action( 'auto_updater_core_event', array( &$this, 'update_core' ) );
-		add_action( 'auto_updater_plugins_event', array( &$this, 'update_plugins' ) );
-		add_action( 'auto_updater_themes_event', array( &$this, 'update_themes' ) );
-		add_action( 'auto_updater_svn_event', array( &$this, 'update_svn' ) );
+		if ( ! defined( 'AUTOMATIC_UPDATER_DISABLED' ) || ! AUTOMATIC_UPDATER_DISABLED ) {
+			add_action( 'auto_updater_core_event',    array( $this, 'update_core' ) );
+			add_action( 'auto_updater_plugins_event', array( $this, 'update_plugins' ) );
+			add_action( 'auto_updater_themes_event',  array( $this, 'update_themes' ) );
+			add_action( 'auto_updater_svn_event',     array( $this, 'update_svn' ) );
+		}
 
 		// Nothing else matters if we're on WPMS and not on the main site
 		if ( is_multisite() && ! is_main_site() )
@@ -63,14 +71,18 @@ class Automatic_Updater {
 			Automatic_Updater_Admin::init( $this );
 		}
 
-		add_action( 'admin_init', array( &$this, 'check_wordpress_version' ) );
+		if ( defined( 'AUTOMATIC_UPDATER_DISABLED' ) && AUTOMATIC_UPDATER_DISABLED )
+			return;
+
+		add_action( 'admin_init', array( $this, 'check_wordpress_version' ) );
 
 		// Configure SVN updates cron, if it's enabled
 		if ( $this->options['svn']['core'] || ! empty( $this->options['svn']['plugins'] ) || ! empty( $this->options['svn']['themes'] ) ) {
 			if ( ! wp_next_scheduled( 'auto_updater_svn_event' ) )
 				wp_schedule_event( time(), 'hourly', 'auto_updater_svn_event' );
 		} else {
-			if ( $timestamp = wp_next_scheduled( 'auto_updater_svn_event' ) )
+			$timestamp = wp_next_scheduled( 'auto_updater_svn_event' );
+			if ( $timestamp )
 				wp_unschedule_event( $timestamp, 'auto_updater_svn_event' );
 		}
 
@@ -87,8 +99,8 @@ class Automatic_Updater {
 			// We're in a cron, do updates now
 			foreach ( $types as $type ) {
 				if ( ! empty( $this->options['update'][ $type ] ) ) {
-					add_action( "set_site_transient_update_$type", array( &$this, "update_$type" ) );
-					add_action( "set_site_transient__site_transient_update_$type", array( &$this, "update_$type" ) );
+					add_action( "set_site_transient_update_$type",                 array( $this, "update_$type" ) );
+					add_action( "set_site_transient__site_transient_update_$type", array( $this, "update_$type" ) );
 				}
 			}
 		} else {
@@ -129,7 +141,7 @@ class Automatic_Updater {
 		if ( version_compare( $GLOBALS['wp_version'], '3.4', '<' ) ) {
 			if ( is_plugin_active( self::$basename ) ) {
 				deactivate_plugins( self::$basename );
-				add_action( 'admin_notices', array( &$this, 'disabled_notice' ) );
+				add_action( 'admin_notices', array( $this, 'disabled_notice' ) );
 				if ( isset( $_GET['activate'] ) )
 					unset( $_GET['activate'] );
 			}
@@ -149,18 +161,18 @@ class Automatic_Updater {
 
 			$this->options = array(
 						'update'                  => array(
-									                  'core'    => $core_updates_enabled,
-									                  'plugins' => false,
-									                  'themes'  => false,
+														'core'    => $core_updates_enabled,
+														'plugins' => false,
+														'themes'  => false,
 						),
 						'retries-limit'           => 3,
 						'tries'                   => array(
-									                  'core' => array(
-												                 'version' => 0,
-												                 'tries'   => 0,
-									                   ),
-									                  'plugins' => array(),
-									                  'themes' => array(),
+														'core' => array(
+																	'version' => 0,
+																	'tries'   => 0,
+														),
+														'plugins' => array(),
+														'themes' => array(),
 						),
 						'svn'                     => array(
 														'core'    => false,
@@ -200,8 +212,8 @@ class Automatic_Updater {
 			$this->options['retries-limit'] = 3;
 			$this->options['tries'] = array(
 									'core'    => array(
-												   'version' => 0,
-												   'tries'   => 0,
+													'version' => 0,
+													'tries'   => 0,
 									),
 									'plugins' => array(),
 									'themes'  => array(),
@@ -213,12 +225,18 @@ class Automatic_Updater {
 			$this->options['svn-success-email'] = true;
 
 		// SVN support for themes and plugins added in 0.8
-		if ( ! is_array( $this->options['svn'] ) )
+		if ( ! is_array( $this->options['svn'] ) ) {
 			$this->options['svn'] =  array(
 										'core'    => $this->options['svn'],
 										'plugins' => array(),
 										'themes'  => array(),
 								);
+		}
+
+		// Warning for incorrect permissions added in 0.9
+		if ( ! array_key_exists( 'show-connection-warning', $this->options ) ) {
+			$this->options['show-connection-warning'] = true;
+		}
 	}
 
 	function update_core() {
@@ -238,7 +256,7 @@ class Automatic_Updater {
 		if ( empty( $updates ) )
 			return;
 
-		if ( 'development' == $updates[0]->response )
+		if ( 'development' === $updates[0]->response )
 			$update = $updates[0];
 		else
 			$update = find_core_update( $updates[0]->current, $updates[0]->locale );
@@ -254,15 +272,19 @@ class Automatic_Updater {
 		$old_version = $GLOBALS['wp_version'];
 
 		// Sanity check that the new upgrade is actually an upgrade
-		if ( 'development' != $update->response && version_compare( $old_version, $update->current, '>=' ) )
+		if ( 'development' !== $update->response && version_compare( $old_version, $update->current, '>=' ) )
 			return;
 
 		// Only do development version updates once every 24 hours
-		if ( 'development' == $update->response ) {
+		if ( 'development' === $update->response ) {
 			if ( time() < $this->options['next-development-update'] )
 				return;
 
 			$this->options['next-development-update'] = strtotime( '+24 hours' );
+
+			// It seems the core upgrade process sometimes prevents the shutdown function from running.
+			// Let's force the option to be saved, just to be certain we don't get repeat updates.
+			update_option( 'automatic-updater', $this->options );
 		}
 
 		$this->running = true;
@@ -277,8 +299,14 @@ class Automatic_Updater {
 
 		do_action( 'auto_updater_after_update', 'core' );
 
+		include( ABSPATH . WPINC . '/version.php' );
+		if ( $old_version === $wp_version ) {
+			// Huh, I guess it didn't really need to do that upgrade
+			return;
+		}
+
 		if ( is_wp_error( $result ) ) {
-			if ( $this->options['tries']['core']['version'] != $update->current )
+			if ( $this->options['tries']['core']['version'] !== $update->current )
 				$this->options['tries']['core']['version'] = $update->current;
 
 			$this->options['tries']['core']['tries']++;
@@ -289,9 +317,9 @@ class Automatic_Updater {
 			$message .= '<br><br>' . $result->get_error_message() . '<br><br>';
 			$message .= sprintf( esc_html__( 'We\'re sorry it didn\'t work out. Please try upgrading manually, instead. This is attempt %1$d of %2$d.', 'automatic-updater' ),
 							$this->options['tries']['core']['tries'],
-							$this->option['retries-limit'] );
-		} else if( 'development' == $update->response ) {
-			$message = esc_html__( "We've successfully upgraded WordPress to the latest nightly build!", 'automatic-updater' );
+							$this->options['retries-limit'] );
+		} else if ( 'development' === $update->response ) {
+			$message = sprintf( esc_html__( 'We\'ve successfully upgraded WordPress from version %1$s to version %2$s, the latest nightly build!', 'automatic-updater' ), $old_version, $wp_version );
 			$message .= '<br><br>' . esc_html__( 'Have fun!', 'automatic-updater' );
 
 			$this->options['tries']['core']['version'] = 0;
@@ -337,10 +365,10 @@ class Automatic_Updater {
 			// Remove any plugins that have failed to upgrade
 			if ( ! empty( $this->options['retries']['plugins'][ $id ] ) ) {
 				// If there's a new version of a failed plugin, we should give it another go.
-				if ( $this->options['retries']['plugins'][ $id ]['version'] != $plugin->update->new_version )
+				if ( $this->options['retries']['plugins'][ $id ]['version'] !== $plugin->update->new_version )
 					unset( $this->options['retries']['plugins'][ $id ] );
 				// If the plugin has already had it's chance, move on.
-				else if ($this->options['retries']['plugins'][ $id ]['tries'] > $this->options['retries-limit'] )
+				else if ( $this->options['retries']['plugins'][ $id ]['tries'] > $this->options['retries-limit'] )
 					unset( $plugins[ $id ] );
 			}
 		}
@@ -365,13 +393,14 @@ class Automatic_Updater {
 
 		foreach ( $plugins as $id => $plugin ) {
 			if ( is_wp_error( $result[ $id ] ) ) {
-				if ( empty( $this->options['retries']['plugins'][ $id ] ) )
+				if ( empty( $this->options['retries']['plugins'][ $id ] ) ) {
 					$this->options['retries']['plugins'][ $id ] = array(
-															'tries' => 1,
+															'tries'   => 1,
 															'version' => $plugin->update->new_version,
 														);
-				else
+				} else {
 					$this->options['retries']['plugins'][ $id ]['tries']++;
+				}
 
 				$upgrade_failed = true;
 
@@ -430,10 +459,10 @@ class Automatic_Updater {
 			// Remove any themes that have failed to upgrade
 			if ( ! empty( $this->options['retries']['themes'][ $id ] ) ) {
 				// If there's a new version of a failed theme, we should give it another go.
-				if ( $this->options['retries']['themes'][ $id ]['version'] != $theme->update['new_version'] )
+				if ( $this->options['retries']['themes'][ $id ]['version'] !== $theme->update['new_version'] )
 					unset( $this->options['retries']['themes'][ $id ] );
 				// If the themes has already had it's chance, move on.
-				else if ($this->options['retries']['themes'][ $id ]['tries'] > $this->options['retries-limit'] )
+				else if ( $this->options['retries']['themes'][ $id ]['tries'] > $this->options['retries-limit'] )
 					unset( $themes[ $id ] );
 			}
 		}
@@ -458,13 +487,14 @@ class Automatic_Updater {
 
 		foreach ( $themes as $id => $theme ) {
 			if ( is_wp_error( $result[ $id ] ) ) {
-				if ( empty( $this->options['retries']['themes'][ $id ] ) )
+				if ( empty( $this->options['retries']['themes'][ $id ] ) ) {
 					$this->options['retries']['themes'][ $id ] = array(
 															'tries' => 1,
 															'version' => $themes->update['new_version'],
 														);
-				else
+				} else {
 					$this->options['retries']['themes'][ $id ]['tries']++;
+				}
 
 				$upgrade_failed = true;
 
@@ -518,9 +548,9 @@ class Automatic_Updater {
 			$output[] = esc_html__( 'WordPress Core:', 'automatic-updater' );
 			exec( 'svn up ' . ABSPATH, $output, $return );
 
-			$update = end( $output );
+			$update = trim( end( $output ) );
 
-			if ( 0 !== strpos( $update, "At revision" ) ) {
+			if ( 0 === $return && ! empty( $update ) && 0 !== strpos( $update, "At revision" ) ) {
 				$found_update = true;
 				$found_core_update = true;
 
@@ -560,9 +590,9 @@ class Automatic_Updater {
 
 				exec( 'svn up ' . WP_PLUGIN_DIR . '/' . plugin_dir_path( $id ), $output, $return );
 
-				$update = end( $output );
+				$update = trim( end( $output ) );
 
-				if ( 0 !== strpos( $update, "At revision" ) ) {
+				if ( 0 === $return && ! empty( $update ) && 0 !== strpos( $update, "At revision" ) ) {
 					$plugin_upgrades++;
 					$found_update = true;
 					$found_plugin_update = true;
@@ -602,9 +632,9 @@ class Automatic_Updater {
 
 				exec( 'svn up ' . $theme->get_stylesheet_directory(), $output, $return );
 
-				$update = end( $output );
+				$update = trim( end( $output ) );
 
-				if ( 0 !== strpos( $update, "At revision" ) ) {
+				if ( 0 === $return && ! empty( $update ) && 0 !== strpos( $update, "At revision" ) ) {
 					$theme_upgrades++;
 					$found_update = true;
 
@@ -684,9 +714,9 @@ class Automatic_Updater {
 						'Content-Type: text/html; charset=UTF-8'
 					);
 
-		add_filter( 'wp_mail_content_type', array( &$this, 'wp_mail_content_type' ) );
+		add_filter( 'wp_mail_content_type', array( $this, 'wp_mail_content_type' ) );
 		wp_mail( $email, $subject, $message, $headers );
-		remove_filter( 'wp_mail_content_type', array( &$this, 'wp_mail_content_type' ) );
+		remove_filter( 'wp_mail_content_type', array( $this, 'wp_mail_content_type' ) );
 	}
 
 	function wp_mail_content_type() {
@@ -706,7 +736,7 @@ class Automatic_Updater {
 
 		if ( function_exists( 'get_core_updates' ) ) {
 			$update_wordpress = get_core_updates( array( 'dismissed' => false ) );
-			if ( ! empty( $update_wordpress ) && 'latest' != $update_wordpress[0]->response )
+			if ( ! empty( $update_wordpress ) && 'latest' !== $update_wordpress[0]->response )
 				$counts['wordpress'] = 1;
 		}
 
@@ -740,18 +770,21 @@ class Automatic_Updater {
 				$return['core'] = $type;
 
 			foreach ( $plugins as $id => $plugin )
-				if ( plugin_dir_path( $id ) != './' && is_dir( WP_PLUGIN_DIR . '/' . plugin_dir_path( $id ) . ".$type" ) )
+				if ( plugin_dir_path( $id ) !== './' && is_dir( WP_PLUGIN_DIR . '/' . plugin_dir_path( $id ) . ".$type" ) ) {
 					$return['plugins'][ $id ] = array(
 													'type'   => $type,
 													'plugin' => $plugin
 					);
+				}
 
-			foreach ( $themes as $id => $theme )
-				if ( is_dir( $theme->get_stylesheet_directory() . "/.$type" ) )
+			foreach ( $themes as $id => $theme ) {
+				if ( is_dir( $theme->get_stylesheet_directory() . "/.$type" ) ) {
 					$return['themes'][ $id ] = array(
 													'type'  => $type,
 													'theme' => $theme
 					);
+				}
+			}
 		}
 
 		return $return;
