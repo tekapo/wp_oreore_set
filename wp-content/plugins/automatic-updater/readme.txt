@@ -1,31 +1,29 @@
-=== Automatic Updater ===
+=== Advanced Automatic Updates ===
 Contributors: pento
 Donate link: http://pento.net/donate/
 Tags: updates, core, plugins, themes, stable, nightly, svn, wordpress automatic upgrader
-Requires at least: 3.4
-Tested up to: 3.6
-Stable tag: 0.9
+Requires at least: 3.7
+Tested up to: 3.8
+Stable tag: 0.9.1
 License: GPL2+
 
-Automatically update WordPress, your themes and plugins! Never have to click the update button again!
+Adds extra options to WordPress' built-in Automatic Updates feature.
 
 == Description ==
 
-Automatic Updater keeps your WordPress install up to date with the latest releases automatically, as soon as the update is available. It supports updating stable releases, nightly releases, or even regular SVN checkouts!
+Advanced Automatic Updates adds extra options to WordPress' built-in Automatic Updates feature. On top of security updates, it also supports installing major releases, plugins, themes, or even regular SVN checkouts!
 
 If you're working on a WordPress Multisite install, it will properly restrict the options page to your Network Admin.
 
 While this will be useful for the vast majority of sites, please exercise caution, particularly if you have any custom themes or plugins running on your site.
-
-There are some Actions and Filters provided, check the [Documentation](http://pento.net/projects/automatic-updater-for-wordpress/) for more details.
 
 == Installation ==
 
 = The Good Way =
 
 1. In your WordPress Admin, go to the Add New Plugins page
-1. Search for: automatic updater
-1. Automatic Updater should be the first result. Click the Install link.
+1. Search for: advanced automatic updates
+1. Advanced Automatic Updates should be the first result. Click the Install link.
 
 = The Old Way =
 
@@ -39,7 +37,23 @@ There are some Actions and Filters provided, check the [Documentation](http://pe
 1. Checkout the current development version from http://plugins.svn.wordpress.org/automatic-updater/trunk/
 1. Subscribe to the [RSS feed](http://plugins.trac.wordpress.org/log/automatic-updater?limit=100&mode=stop_on_copy&format=rss) to be notified of changes
 
+== Frequently Asked Questions ==
+
+= Why is the debug email going to the admin email address, instead of the override email address? =
+
+The debug email doesn't provide a filter to allow changing the email address it's being sent to. This will hopefully change in a future release of WordPress, you can follow progress in [this ticket](http://core.trac.wordpress.org/ticket/25756).
+
 == Changelog ==
+
+= 1.0 =
+With the release of WordPress 3.7, Automatic Updater is now know as Advanced Automatic Updates!
+
+* ADDED: Options to enable Major and Minor Core updates
+* ADDED: Warning in wp-admin when AUTOMATIC_UPDATER_DISABLED is set
+* ADDED: Turkish (tr_TR) translation. Props [Tufan Tunç](http://www.wpdestek.com/)
+* CHANGED: Debug Email option now allows enabling only for dev upgrades (default)
+* UPDATED: Language POT file
+* FIXED: PHP notice in PHP 5.4+ with WP_DEBUG enabled
 
 = 0.9.1 =
 * UPDATED: Language POT file
@@ -174,6 +188,7 @@ There are some Actions and Filters provided, check the [Documentation](http://pe
 = 0.1 =
 * Initial release
 
-== Screenshots ==
+== Upgrade Notice ==
 
-1. Notification emails are sent to the site admin as soon as an update is complete, confirming if the update was successful or not.
+= 1.0 =
+With the release of WordPress 3.7, Automatic Updater is now know as Advanced Automatic Updates!

@@ -5,7 +5,7 @@ class Automatic_Updater_Admin {
 	private $adminPage;
 	private $adminUrl;
 
-	function init( $automatic_updater ) {
+	static function init( $automatic_updater ) {
 		static $instance = false;
 
 		if( ! $instance )
@@ -29,14 +29,12 @@ class Automatic_Updater_Admin {
 			add_action( 'admin_menu', array( $this, 'plugin_menu' ) );
 		}
 
-		add_action( 'wp_ajax_automatic-updater-hide-connection-warning', array( $this, 'ajax_hide_connection_warning' ) );
-
 		add_filter( 'plugin_action_links_' . Automatic_Updater::$basename, array( $this, 'plugin_row_links' ) );
 		add_filter( 'network_admin_plugin_action_links_' . Automatic_Updater::$basename, array( $this, 'plugin_row_links' ) );
 	}
 
 	function plugin_menu() {
-		$hook = add_submenu_page( $this->adminPage, esc_html__( 'Automatic Updater', 'automatic-updater' ), esc_html__( 'Automatic Updater', 'automatic-updater' ), 'update_core', 'automatic-updater', array( $this, 'settings' ) );
+		$hook = add_submenu_page( $this->adminPage, esc_html__( 'Advanced Automatic Updates', 'automatic-updater' ), esc_html__( 'Advanced Automatic Updates', 'automatic-updater' ), 'update_core', 'automatic-updater', array( $this, 'settings' ) );
 
 		add_action( "load-$hook", array( $this, 'settings_loader' ) );
 
@@ -59,7 +57,7 @@ class Automatic_Updater_Admin {
 		);
 
 		wp_enqueue_style(  'automatic-updater-admin', plugins_url( 'css/admin.css', Automatic_Updater::$basename ) );
-		wp_enqueue_script( 'automatic-updater-admin', plugins_url( 'js/admin.js',   Automatic_Updater::$basename ) );
+		//wp_enqueue_script( 'automatic-updater-admin', plugins_url( 'js/admin.js',   Automatic_Updater::$basename ) );
 	}
 
 	function settings() {
@@ -83,7 +81,7 @@ class Automatic_Updater_Admin {
 
 		<div class="wrap">
 			<?php screen_icon( 'tools' ); ?>
-			<h2><?php esc_html_e( 'Automatic Updater', 'automatic-updater' ); ?></h2>
+			<h2><?php esc_html_e( 'Advanced Automatic Updates', 'automatic-updater' ); ?></h2>
 
 			<?php if ( ! empty( $message ) ) { ?>
 				<div class="updated">
@@ -91,22 +89,11 @@ class Automatic_Updater_Admin {
 				</div>
 			<?php } ?>
 
-			<?php
-				if ( $this->automatic_updater->get_option( 'show-connection-warning' ) ) {
-					// If it isn't a direct connection
-					$method = get_filesystem_method();
-					if ( 'direct' !== $method && ! defined( 'FTP_USER' ) ) {
-						// Using a remote login method, and the upgrade info probably isn't defined
-						$admin_url = wp_nonce_url( "{$this->adminUrl}&action=hide-connection-warning", 'automatic-updater-hide-connection-warning' );
-			?>
-						<div class="updated">
-							<p><?php echo wp_kses( sprintf( __( 'It looks like Automatic Updater may not be able to run automatically, due to not having permission to write to the WordPress directory, or connect to the server over FTP. If you usually upgrade by entering your FTP login details, please read <a href="%s">this documentation</a> on storing your connection details.', 'automatic-updater' ), 'http://codex.wordpress.org/Editing_wp-config.php#WordPress_Upgrade_Constants' ), array( 'a' => array( 'href' => array() ) ) ); ?></p>
-							<p><?php echo wp_kses( sprintf( __( 'Alternatively, if WordPress normally upgrades immediately when you click the Update button, or if you don\'t want to see this message again, feel free to <a href="%1$s" id="%2$s">hide it</a>.', 'automatic-updater' ), $admin_url, 'automatic-updater-hide-connection-warning' ), array( 'a' => array( 'href' => array(), 'id' => array() ) ) ); ?></p>
-						</div>
-			<?php
-					}
-				}
-			?>
+			<?php if ( defined( 'AUTOMATIC_UPDATER_DISABLED' ) && AUTOMATIC_UPDATER_DISABLED ) { ?>
+				<div class="updated">
+					<p><?php echo wp_kses( __( 'You have the <code>AUTOMATIC_UPDATER_DISABLED</code> constant set.  Automatic updates are disabled.', 'automatic-updater' ), array( 'code' => array() ) ); ?></p>
+				</div>
+			<?php } ?>
 
 			<?php
 			if ( is_plugin_active( 'better-wp-security/better-wp-security.php' ) ) {
@@ -114,35 +101,32 @@ class Automatic_Updater_Admin {
 				if ( ! empty( $bwpsoptions[ 'st_corenot' ] ) || ! empty( $bwpsoptions[ 'st_pluginnot' ] ) || ! empty( $bwpsoptions[ 'st_themenot' ] ) ) {
 			?>
 					<div class="updated">
-						<p><?php echo wp_kses( sprintf( __( 'The Better WP Security plugin is hiding updates, which will prevent Automatic Updater from operating correctly. Please <a href="%s">disable these options</a>.', 'automatic-updater' ), admin_url( 'admin.php?page=better-wp-security-systemtweaks#st_themenot' ) ), array( 'a' => array( 'href' => array() ) ) ); ?></p>
+						<p><?php echo wp_kses( sprintf( __( 'The Better WP Security plugin is hiding updates, which will prevent Automatic Updates from operating correctly. Please <a href="%s">disable these options</a>.', 'automatic-updater' ), admin_url( 'admin.php?page=better-wp-security-systemtweaks#st_themenot' ) ), array( 'a' => array( 'href' => array() ) ) ); ?></p>
 					</div>
 			<?php
 				}
 			}
+
+			$update_options = $this->automatic_updater->get_option( 'update' );
 			?>
 
 			<form method="post">
 				<?php wp_nonce_field( 'automatic-updater-settings' ); ?>
 
-				<?php
-				$messages = array(
-								'core' => wp_kses( __( 'Update WordPress Core automatically? <strong>(Strongly Recommended)</strong>', 'automatic-updater' ), array( 'strong' => array() ) ),
-								'plugins' => esc_html__( 'Update your plugins automatically?', 'automatic-updater' ),
-								'themes' => esc_html__( 'Update your themes automatically?', 'automatic-updater' )
-							);
+				<div  class="automatic-updater-core-options"><?php esc_html_e( 'Update WordPress Core automatically?', 'automatic-updater' ); ?>
+					<fieldset>
+						<input type="checkbox" id="core-major" name="core-major" value="1"<?php echo ( $update_options['core']['major'] )?( ' checked="checked"' ):( '' ); ?>> <label for="core-major"><?php echo wp_kses( __( 'Major versions', 'automatic-updater' ), array( 'strong' => array() ) ); ?></label><br>
+						<input type="checkbox" id="core-minor" name="core-minor" value="1"<?php echo ( $update_options['core']['minor'] )?( ' checked="checked"' ):( '' ); ?>> <label for="core-minor"><?php echo wp_kses( __( 'Minor and security versions <strong>(Strongly Recommended)</strong>', 'automatic-updater' ), array( 'strong' => array() ) ); ?></label><br>
+					</fieldset>
+				</div>
 
-				foreach ( $this->automatic_updater->get_option( 'update' ) as $type => $enabled ) {
-					$checked = '';
-					if ( $enabled )
-						$checked = ' checked="checked"';
+				<p><input type="checkbox" id="plugins" name="plugins" value="1"<?php echo ( $update_options['plugins'] )?( ' checked="checked"' ):( '' ); ?>> <label for="plugins"><?php esc_html_e( 'Update your plugins automatically?', 'automatic-updater' ); ?></label><p>
 
-					echo "<p><input type='checkbox' id='$type' name='$type' value='1'$checked> <label for='$type'>{$messages[ $type ]}</label></p>";
-				}
-				?>
+				<p><input type="checkbox" id="themes" name="themes" value="1"<?php echo ( $update_options['themes'] )?( ' checked="checked"' ):( '' ); ?>> <label for="themes"><?php esc_html_e( 'Update your themes automatically?', 'automatic-updater' ); ?></label><p>
 
 				<br>
 				<h3><?php esc_html_e( 'Notification Email', 'automatic-updater' ); ?></h3>
-				<p><?php esc_html_e( 'By default, Automatic Updater will send an email to the Site Admin when an update is performed. If you would like to send that email to a different address, you can set it here.', 'automatic-updater' ); ?></p>
+				<p><?php esc_html_e( 'By default, Automatic Updates will send an email to the Site Admin when an update is performed. If you would like to send that email to a different address, you can set it here.', 'automatic-updater' ); ?></p>
 				<p><label for="override-email"><?php esc_html_e( 'Override Email Address', 'automatic-updater' ); ?>:</label> <input type="text" name="override-email" id="override-email" value="<?php echo esc_attr( $this->automatic_updater->get_option( 'override-email' ) ); ?>"></p>
 
 				<?php
@@ -153,11 +137,6 @@ class Automatic_Updater_Admin {
 
 				<p><?php esc_html_e( "If you don't want to receive an email when updates are installed, you can disable them completely.", 'automatic-updater' ); ?></p>
 				<p><input type="checkbox" name="disable-email" id="disable-email" value="1"<?php echo $checked; ?>> <label for="disable-email"><?php esc_html_e( 'Disable email notifications.', 'automatic-updater' ); ?></label></p>
-
-				<br>
-				<h3><?php esc_html_e( 'Retries', 'automatic-updater' ); ?></h3>
-				<p><?php esc_html_e( 'To avoid updating when something is broken, Automatic Updater can limit the number of times it will attempt to update WordPress Core, a plugin or a theme. If, for example, a plugin update reaches this limit, Automatic Updater will stop trying to update it until you manually install the update, or a new version is released.', 'automatic-updater' ); ?></p>
-				<p><label for="retries-limit"><?php esc_html_e( 'Retries Limit', 'automatic-updater' ); ?>:</label> <input type="number" step="1" name="retries-limit" id="retries-limit" class="small-text" value="<?php echo esc_attr( $this->automatic_updater->get_option( 'retries-limit' ) ); ?>"></p>
 
 				<?php
 				$source_control = $this->automatic_updater->under_source_control();
@@ -178,7 +157,7 @@ class Automatic_Updater_Admin {
 							$writable_error = true;
 					?>
 						<h4><?php esc_html_e( 'WordPress Core', 'automatic-updater' ); ?></h4>
-						<p><?php echo wp_kses( __( "It looks like you're running an SVN version of WordPress, that's cool! Automatic Updater can run <tt>svn up</tt> once an hour, to keep you up-to-date. For safety, enabling this option will disable the normal WordPress core updates.", 'automatic-updater' ), array( 'tt' => array() ) ); ?></p>
+						<p><?php echo wp_kses( __( "It looks like you're running an SVN version of WordPress, that's cool! Advanced Automatic Updates can run <tt>svn up</tt> once an hour, to keep you up-to-date. For safety, enabling this option will disable the normal WordPress core updates.", 'automatic-updater' ), array( 'tt' => array() ) ); ?></p>
 					<p><input type="checkbox" id="svn-core" name="svn-core" value="1"<?php echo $svn_core_checked; ?>> <label for="svn-core"><?php esc_html_e( 'Update WordPress Core hourly?', 'automatic-updater' ); ?></label></p>
 
 					<?php
@@ -244,15 +223,29 @@ class Automatic_Updater_Admin {
 					<input type="hidden" name="svn-success-email" value="0">
 				<?php
 				}
-
-				$checked = '';
-				if ( $this->automatic_updater->get_option( 'debug' ) )
-					$checked = ' checked="checked"';
 				?>
 
 				<br>
 				<h3><?php esc_html_e( 'Debug Information', 'automatic-updater' ); ?></h3>
-				<p><input type="checkbox" id="debug" name="debug" value="1"<?php echo $checked; ?>> <label for="debug"><?php esc_html_e( 'Show debug information in the notification email.', 'automatic-updater' ); ?></label></p>
+				<div>
+					<label for="debug"><?php esc_html_e( 'When would you like to receive debug information with your notification email?', 'automatic-updater' ); ?></label>
+					<fieldset id="debug">
+						<?php
+						$debug_options = array(
+							'always' => esc_html__( 'Always', 'automatic-updater' ),
+							'debug'  => wp_kses( __( 'Only when upgrading development versions <strong>(Recommended Minimum)</strong>', 'automatic-updater' ), array( 'strong' => array() ) ),
+							'never'  => esc_html__( 'Never', 'automatic-updater' ),
+						);
+
+						foreach ( $debug_options as $option => $label ) {
+							echo "<input type='radio' name='debug' id='debug-$option' value='$option'";
+							if ( $option === $this->automatic_updater->get_option( 'debug' ) )
+								echo " checked='checked'";
+							echo "> <label for='debug-$option'>$label</label><br>";
+						}
+						?>
+					</fieldset>
+				</div><br>
 				<p><input class="button button-primary" type="submit" name="submit" id="submit" value="<?php esc_attr_e( 'Save Changes', 'automatic-updater' ); ?>" /></p>
 			</form>
 		</div>
@@ -260,17 +253,17 @@ class Automatic_Updater_Admin {
 	}
 
 	function save_settings() {
-		$types = array( 'core', 'plugins', 'themes' );
-		$update = array();
-		foreach ( $types as $type ) {
-			if ( ! empty( $_REQUEST[ $type ] ) )
-				$update[ $type ] = true;
-			else
-				$update[ $type ] = false;
-		}
+		$update = array(
+					'core' => array(
+								'major' => !empty( $_REQUEST['core-major'] ),
+								'minor' => !empty( $_REQUEST['core-minor'] ),
+					),
+					'plugins' => !empty( $_REQUEST['plugins'] ),
+					'themes'  => !empty( $_REQUEST['themes'] ),
+		);
 		$this->automatic_updater->update_option( 'update', $update );
 
-		$top_bool_options = array( 'debug', 'disable-email' );
+		$top_bool_options = array( 'disable-email' );
 		foreach ( $top_bool_options as $option ) {
 			if ( ! empty( $_REQUEST[ $option ] ) )
 				$this->automatic_updater->update_option( $option, true );
@@ -278,7 +271,7 @@ class Automatic_Updater_Admin {
 				$this->automatic_updater->update_option( $option, false );
 		}
 
-		$top_options = array( 'override-email', 'retries-limit' );
+		$top_options = array( 'override-email', 'debug' );
 		foreach ( $top_options as $option ) {
 			$this->automatic_updater->update_option( $option, $_REQUEST[ $option ] );
 		}
@@ -309,11 +302,6 @@ class Automatic_Updater_Admin {
 		}
 
 		$this->automatic_updater->update_option( 'svn', $svn_options );
-	}
-
-	function ajax_hide_connection_warning() {
-		$this->automatic_updater->update_option( 'show-connection-warning', false );
-		die();
 	}
 
 	function footer() {
