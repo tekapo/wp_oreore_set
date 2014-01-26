@@ -4,7 +4,7 @@
  * Plugin URI: http://pento.net/projects/automatic-updater-for-wordpress/
  * Description: Adds extra options to WordPress' built-in Automatic Updates feature.
  * Author: pento
- * Version: 1.0
+ * Version: 1.0.2
  * Author URI: http://pento.net/
  * License: GPL2+
  * Text Domain: automatic-updater
@@ -96,7 +96,7 @@ class Automatic_Updater {
 
 		if ( ! empty( $this->options['override-email'] ) ) {
 			add_filter( 'auto_core_update_email', array( $this, 'override_update_email' ), 1, 1 );
-			add_filter( 'auto_update_debug_email', array( $this, 'override_update_email' ), 1, 1 );
+			add_filter( 'automatic_updates_debug_email', array( $this, 'override_update_email' ), 1, 1 );
 		}
 
 		// Default is to send the debug email with dev builds, so we don't need to filter for that
@@ -138,6 +138,13 @@ class Automatic_Updater {
 		return null;
 	}
 
+	static function activation_check() {
+		if ( version_compare( $GLOBALS['wp_version'], '3.7', '<' ) ) {
+			deactivate_plugins( self::$basename );
+			wp_die( __( 'Automatic Updater requires WordPress 3.7 or higher! Please upgrade WordPress manually, then reactivate Automatic Updater.' ), '', array( 'back_link' => true ) );
+		}
+	}
+
 	function check_wordpress_version() {
 		if ( version_compare( $GLOBALS['wp_version'], '3.7', '<' ) ) {
 			if ( is_plugin_active( self::$basename ) ) {
@@ -160,13 +167,13 @@ class Automatic_Updater {
 				include_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
 
 			$wpau = new WP_Automatic_Updater();
-			$core_updates_enabled = $wpau->is_vcs_checkout( ABSPATH );
+			$core_updates_enabled = ! $wpau->is_vcs_checkout( ABSPATH );
 
 			$this->options = array(
 						'update'                  => array(
 														'core'    => array(
 																		'minor' => $core_updates_enabled,
-																		'major' => $core_updates_enabled,
+																		'major' => false,
 														),
 														'plugins' => false,
 														'themes'  => false,
@@ -512,3 +519,5 @@ class Automatic_Updater {
 }
 
 add_action( 'init', array( 'Automatic_Updater', 'init' ) );
+
+register_activation_hook( __FILE__, array( 'Automatic_Updater', 'activation_check' ) );

@@ -4,7 +4,7 @@ Donate link: http://pento.net/donate/
 Tags: updates, core, plugins, themes, stable, nightly, svn, wordpress automatic upgrader
 Requires at least: 3.7
 Tested up to: 3.8
-Stable tag: 0.9.1
+Stable tag: 1.0.1
 License: GPL2+
 
 Adds extra options to WordPress' built-in Automatic Updates feature.
@@ -44,6 +44,18 @@ While this will be useful for the vast majority of sites, please exercise cautio
 The debug email doesn't provide a filter to allow changing the email address it's being sent to. This will hopefully change in a future release of WordPress, you can follow progress in [this ticket](http://core.trac.wordpress.org/ticket/25756).
 
 == Changelog ==
+
+= 1.0.2 =
+* ADDED: Strictly disallow activation on versions of WordPress earlier than 3.7
+* CHANGED: Update filter name for redirecting debug emails (only available in WordPress 3.8+)
+
+= 1.0.1 =
+* CHANGED: Fresh installs now disable Major updates by default, to match Core behaviour
+* UPDATED: German (de_DE) translation. Props [Alexander Pfabel](http://alexander.pfabel.de/)
+* UPDATED: Japanese (日本語) (ja) translation. Props [Tai](http://tekapo.com/)
+* UPDATED: Italian (it_IT) translation. Props Stefano Giolo
+* UPDATED: Dutch (nl_NL) translation. Props Trifon Rijksen
+* FIXED: Fresh installs had Minor updates disabled
 
 = 1.0 =
 With the release of WordPress 3.7, Automatic Updater is now know as Advanced Automatic Updates!

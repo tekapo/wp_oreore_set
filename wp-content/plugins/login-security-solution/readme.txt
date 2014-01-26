@@ -452,9 +452,9 @@ on our GitHub.
         * `svn checkout http://i18n.svn.wordpress.org/tools/trunk/ makepot`
         * So, now you'll have:
 
-            <parent dir>
-                |- login-security-solution/
-                |- makepot/
+                parent dir
+                    |- login-security-solution/
+                    |- makepot/
 
     1. `cd login-security-solution/languages`
     1. `./makepot.sh`
@@ -469,6 +469,9 @@ on our GitHub.
 
 
 == Changelog ==
+
+= 0.43.0 (2014-01-16) =
+* By popular demand, notification emails now include the full IP address.
 
 = 0.42.0 (2013-07-06) =
 * Have Maintenence Mode messaging say who turned it on and how to turn it off.

@@ -1,3 +1,4 @@
 /nbproject/
 wp-config.php
 uploads/
+wp-content/plugins/show-currnet-branch
