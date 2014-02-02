@@ -316,7 +316,15 @@ class WP_Stream_Admin {
 		check_ajax_referer( 'stream_nonce', 'wp_stream_nonce' );
 		if ( current_user_can( self::SETTINGS_CAP ) ) {
 			self::erase_stream_records();
-			wp_redirect( add_query_arg( array( 'page' => 'wp_stream_settings', 'message' => 'data_erased' ), admin_url( 'admin.php' ) ) );
+			wp_redirect(
+				add_query_arg(
+					array(
+						'page'    => 'wp_stream_settings',
+						'message' => 'data_erased',
+					),
+					admin_url( self::ADMIN_PARENT_PAGE )
+				)
+			);
 			exit;
 		} else {
 			wp_die( "You don't have sufficient priviledges to do this action." );
@@ -596,7 +604,7 @@ class WP_Stream_Admin {
 		$enable_update = get_user_meta( get_current_user_id(), 'stream_live_update_records', true );
 		$enable_update = isset( $enable_update ) ? $enable_update : '';
 
-		if ( 'live-update' === $data['wp-stream-heartbeat'] && $enable_update == 'on' ) {
+		if ( isset( $data['wp-stream-heartbeat'] ) && 'live-update' === $data['wp-stream-heartbeat'] && $enable_update == 'on' ) {
 			// Register list table
 			require_once WP_STREAM_INC_DIR . 'list-table.php';
 			self::$list_table = new WP_Stream_List_Table( array( 'screen' => self::RECORDS_PAGE_SLUG ) );
