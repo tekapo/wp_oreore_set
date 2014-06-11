@@ -3,8 +3,8 @@
 Plugin Name: TinyMCE and TinyMCE Advanced Professsional Formats and Styles
 Plugin URI: http://www.blackbam.at/blog/
 Description: Improve, style and completly customize your TinyMCE, TinyMCE Advanced (and some other variants) by using custom editor stylesheets in combination with a dynamically configurable styles dropdown.
-Author: David StÃ¶ckl
-Version: 1.1.1
+Author: David Stöckl
+Version: 1.1.2
 Author URI: http://www.blackbam.at/blog/
 License: GPLv3
  *

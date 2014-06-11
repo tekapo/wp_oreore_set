@@ -11,7 +11,7 @@ class WP_Stream_Feeds {
 	const GENERATE_KEY_QUERY_VAR = 'stream_new_user_feed_key';
 
 	public static function load() {
-		if ( ! isset( WP_Stream_Settings::$options['general_private_feeds'] ) || 1 != WP_Stream_Settings::$options['general_private_feeds'] ) {
+		if ( ! isset( WP_Stream_Settings::$options['general_private_feeds'] ) || ! WP_Stream_Settings::$options['general_private_feeds'] ) {
 			return;
 		}
 
@@ -61,20 +61,36 @@ class WP_Stream_Feeds {
 		$pretty_permalinks = get_option( 'permalink_structure' );
 
 		if ( empty( $pretty_permalinks ) ) {
-			$link = add_query_arg( array( 'feed' => self::FEED_QUERY_VAR, self::FEED_KEY_QUERY_VAR => $key ), home_url( '/' ) );
+			$link = add_query_arg(
+				array(
+					'feed'                   => self::FEED_QUERY_VAR,
+					self::FEED_KEY_QUERY_VAR => $key,
+				),
+				home_url( '/' )
+			);
 		} else {
-			$link = add_query_arg( array( self::FEED_KEY_QUERY_VAR => $key ), home_url( sprintf( '/feed/%s/', self::FEED_QUERY_VAR ) ) );
+			$link = add_query_arg(
+				array(
+					self::FEED_KEY_QUERY_VAR => $key,
+				),
+				home_url(
+					sprintf(
+						'/feed/%s/',
+						self::FEED_QUERY_VAR
+					)
+				)
+			);
 		}
 
 		$nonce = wp_create_nonce( 'wp_stream_generate_key' );
 		?>
 		<table class="form-table">
 			<tr>
-				<th><label for="stream_feed_url"><?php esc_html_e( 'Stream Feeds Key', 'stream' ) ?></label></th>
+				<th><label for="<?php echo esc_attr( self::USER_FEED_KEY ) ?>"><?php esc_html_e( 'Stream Feeds Key', 'stream' ) ?></label></th>
 				<td>
 					<p>
-						<code><?php echo esc_html( $key ) ?></code>
-						<small><a href="<?php echo esc_url( add_query_arg( array( self::GENERATE_KEY_QUERY_VAR => true, 'wp_stream_nonce' => $nonce ) ) ) ?>"><?php esc_html_e( 'Generate new key', 'stream' ) ?></a></small>
+						<input type="text" name="<?php echo esc_attr( self::USER_FEED_KEY ) ?>" id="<?php echo esc_attr( self::USER_FEED_KEY ) ?>" class="regular-text code" value="<?php echo esc_attr( $key ) ?>" readonly>
+						<small><a href="<?php echo esc_url( add_query_arg( array( self::GENERATE_KEY_QUERY_VAR => true, 'wp_stream_nonce' => $nonce ) ) . sprintf( '#wp-stream-highlight:%s', self::USER_FEED_KEY ) ) ?>"><?php esc_html_e( 'Generate new key', 'stream' ) ?></a></small>
 					</p>
 					<p class="description"><?php esc_html_e( 'This is your private key used for accessing feeds of Stream Records securely. You can change your key at any time by generating a new one using the link above.', 'stream' ) ?></p>
 					<p>
@@ -128,13 +144,19 @@ class WP_Stream_Feeds {
 			'orderby'          => isset( $_GET['orderby'] ) ? (string) $_GET['orderby'] : 'ID',
 			'fields'           => isset( $_GET['fields'] ) ? (string) $_GET['fields'] : '',
 		);
+
 		$records = stream_query( $args );
 
 		$latest_record = isset( $records[0]->created ) ? $records[0]->created : null;
 
-		$records_admin_url = add_query_arg( array( 'page' => WP_Stream_Admin::RECORDS_PAGE_SLUG ), admin_url( WP_Stream_Admin::ADMIN_PARENT_PAGE ) );
+		$records_admin_url = add_query_arg(
+			array(
+				'page' => WP_Stream_Admin::RECORDS_PAGE_SLUG,
+			),
+			admin_url( WP_Stream_Admin::ADMIN_PARENT_PAGE )
+		);
 
-		if ( 'json' === filter_input( INPUT_GET, self::FEED_TYPE_QUERY_VAR ) ) {
+		if ( 'json' === wp_stream_filter_input( INPUT_GET, self::FEED_TYPE_QUERY_VAR ) ) {
 			if ( version_compare( PHP_VERSION, '5.4', '>=' ) ) {
 				echo json_encode( $records, JSON_PRETTY_PRINT );
 			} else {
@@ -154,6 +176,11 @@ class WP_Stream_Feeds {
 				xmlns:atom="http://www.w3.org/2005/Atom"
 				xmlns:sy="http://purl.org/rss/1.0/modules/syndication/"
 				xmlns:slash="http://purl.org/rss/1.0/modules/slash/"
+				<?php
+				/**
+				 * Action fires during RSS xmls printing
+				 */
+				?>
 				<?php do_action( 'rss2_ns' ) ?>
 			>
 				<channel>
@@ -165,10 +192,20 @@ class WP_Stream_Feeds {
 					<language><?php bloginfo_rss( 'language' ) ?></language>
 					<sy:updatePeriod><?php echo esc_html( 'hourly' ) ?></sy:updatePeriod>
 					<sy:updateFrequency><?php echo absint( 1 ) ?></sy:updateFrequency>
+					<?php
+					/**
+					 * Action fires during RSS head
+					 */
+					?>
 					<?php do_action( 'rss2_head' ) ?>
 					<?php foreach ( $records as $record ) : ?>
 						<?php
-						$record_link  = add_query_arg( array( 'record__in' => (int) $record->ID ), $records_admin_url );
+						$record_link  = add_query_arg(
+							array(
+								'record__in' => (int) $record->ID,
+							),
+							$records_admin_url
+						);
 						$author       = get_userdata( $record->author );
 						$display_name = isset( $author->display_name ) ? $author->display_name : 'N/A';
 						?>
@@ -182,6 +219,11 @@ class WP_Stream_Feeds {
 							<category domain="ip"><?php echo esc_html( $record->ip ) ?></category>
 							<guid isPermaLink="false"><?php echo esc_url( $record_link ) ?></guid>
 							<link><?php echo esc_url( $record_link ) ?></link>
+							<?php
+							/**
+							 * Action fires during RSS item
+							 */
+							?>
 							<?php do_action( 'rss2_item' ) ?>
 						</item>
 					<?php endforeach; ?>

@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_i
 Tags: tinymce, advanced, visual, editor, style, custom
 Requires at least: 3.0
 Tested up to: 3.6
-Stable tag: 1.1.1
+Stable tag: 1.1.2
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -30,7 +30,12 @@ B. The main feature of this Plugin is to offer a GUI to create custom style form
 - Easy and very fast to add/change/delete
 - You do not have to change one single line of source code
 
-Current Languages: en_US, de_DE, es_ES
+Current Languages: 
+
+- en_US
+- de_DE
+- es_ES (Andrew Kurtis, webhostinghub.com)
+- sr_RS (Ognjen Djuraskovic, firstsiteguide.com)
 
 Please report any bugs you may encounter and support this Plugin if you like it.
 
@@ -94,7 +99,7 @@ IMPORTANT: Go to the settings page of the Plugin and set the location of where t
 == Changelog ==
 
 = 1.1.1 =
-- Added language files Spanish (es) by Andrew Kurtis
+- Added language files Spanish (es) by Andrew Kurtis (http://webhostinghub.com/)
 
 = 1.1.0 =
 - Added the possibility to define custom paths for editor styles (better compatibility)
